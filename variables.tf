@@ -1,6 +1,7 @@
 variable "amplify_app_name" {
 	type = string
 	description = "Amplify App Name"
+	default = "Amplify App"
 }
 
 variable "amplify_repository_url" {
@@ -21,12 +22,18 @@ variable "amplify_repo_branch_name" {
 
 variable "app_domain_name" {
   type = string
-  default = "awsamplifyapp.com"
   description = "AWS Amplify Domain Name"
+  default = "awsamplifyapp.com"
 }
 
 variable "update_current_image_lambda_function_name" {
   type = string
-  default = "awsamplifyapp.com"
   description = "The name of the lambda function for updating the current image used on the app"
+  default = "updateCurrentImage"
+}
+
+variable "email_addresses" {
+	type = list(string)
+	description = "List of email addresses to subscribe to the SNS topic"
+	default = []
 }

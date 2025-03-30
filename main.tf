@@ -97,3 +97,31 @@ resource "aws_cloudwatch_event_target" "update_current_image_target" {
   target_id = "LambdaTarget"
   arn = data.aws_lambda_function.update_current_image_function.arn
 }
+
+# SNS Topic for email notifications
+resource "aws_sns_topic" "email_notification_topic" {
+  name = "email-notification-topic"
+}
+
+resource "aws_sns_topic_subscription" "email_subscribers" {
+  count = length(var.email_addresses)
+  topic_arn = aws_sns_topic.email_notification_topic.arn
+  protocol = "email"
+  endpoint = var.email_addresses[count.index]
+}
+
+resource "aws_sns_topic_policy" "sns_allow_publish_policy" {
+  arn = aws_sns_topic.email_notification_topic.arn
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Principal = "*"
+        Action   = "sns:Publish"
+        Resource = aws_sns_topic.email_notification_topic.arn
+      }
+    ]
+  })
+}

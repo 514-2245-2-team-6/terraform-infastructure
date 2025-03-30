@@ -2,7 +2,7 @@
 *.tfstate
 *.tfstate.backup
 terraform.tfstate.d/
-testing.tfvar
+dev-private.tfvars
 
 # Terraform plan files
 *.tfplan
