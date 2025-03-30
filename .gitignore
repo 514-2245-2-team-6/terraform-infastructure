@@ -1,3 +1,6 @@
+# Bash Files
+*.sh
+
 # Terraform state files (DO NOT COMMIT)
 *.tfstate
 *.tfstate.backup

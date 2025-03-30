@@ -37,3 +37,15 @@ variable "email_addresses" {
 	description = "List of email addresses to subscribe to the SNS topic"
 	default = []
 }
+
+variable sns_email_notification_topic_name {
+	type = string
+	description = "The name of the SNS topic for email notifications"
+	default = "WheresWaldoUpdate"
+}
+
+variable github_organization {
+	type = string
+	description = "The name of the GitHub organization"
+	default = "514-2245-2-team-6"
+}
