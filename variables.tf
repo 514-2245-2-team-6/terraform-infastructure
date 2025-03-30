@@ -24,3 +24,9 @@ variable "app_domain_name" {
   default = "awsamplifyapp.com"
   description = "AWS Amplify Domain Name"
 }
+
+variable "update_current_image_lambda_function_name" {
+  type = string
+  default = "awsamplifyapp.com"
+  description = "The name of the lambda function for updating the current image used on the app"
+}

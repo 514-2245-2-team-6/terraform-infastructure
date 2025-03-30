@@ -2,6 +2,7 @@ provider "aws" {
   region = "us-east-1"
 }
 
+# Amplify App
 resource "aws_amplify_app" "amplify_app" {
   name = var.amplify_app_name
   repository = var.amplify_repository_url
@@ -70,4 +71,29 @@ resource "aws_amplify_domain_association" "domain_association" {
     prefix      = var.amplify_repo_branch_name
   }
 
+}
+
+# CloudWatch Daily Reccurring Update Current Image Trigger
+data "aws_lambda_function" "update_current_image_function" {
+  function_name = var.update_current_image_lambda_function_name
+}
+
+resource "aws_cloudwatch_event_rule" "update_current_image_rule" {
+  name = "UpdateCurrentImage"
+  description = "Triggers the update current image lambda function every day at 12:00 UTC"
+  schedule_expression = "cron(0 12 * * ? *)"
+}
+
+resource "aws_lambda_permission" "update_current_image_target" {
+  statement_id = "AllowExecutionFromCloudWatch"
+  action = "lambda:InvokeFunction"
+  function_name = data.aws_lambda_function.update_current_image_function.function_name
+  principal = "events.amazonaws.com"
+  source_arn = aws_cloudwatch_event_rule.update_current_image_rule.arn
+}
+
+resource "aws_cloudwatch_event_target" "update_current_image_target" {
+  rule = aws_cloudwatch_event_rule.update_current_image_rule.name
+  target_id = "LambdaTarget"
+  arn = data.aws_lambda_function.update_current_image_function.arn
 }
