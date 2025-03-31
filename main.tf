@@ -49,11 +49,15 @@ resource "aws_amplify_app" "amplify_app" {
     status = "404"
     target = "/index.html"
   }
-
-
   environment_variables = {
     NODE_OPTIONS = "--max-old-space-size=4096"
+    REACT_APP_API_GATEWAY_BASE_URL = "https://${aws_api_gateway_rest_api.lambda_api.id}.execute-api.us-east-1.amazonaws.com/${aws_api_gateway_stage.lambda_api_stage.stage_name}"
   }
+
+	depends_on = [
+		aws_api_gateway_rest_api.lambda_api,
+		aws_api_gateway_stage.lambda_api_stage
+	]
 }
 
 resource "aws_amplify_branch" "amplify_branch" {
@@ -143,7 +147,7 @@ resource "aws_lambda_function" "verify_face_selection_function" {
 resource "aws_cloudwatch_event_rule" "update_current_image_rule" {
   name = "UpdateCurrentImage"
   description = "Triggers the update current image lambda function every day at 12:00 UTC"
-  schedule_expression = "cron(0 12 * * ? *)"
+  schedule_expression = "cron(8 5 * * ? *)"
 }
 
 resource "aws_lambda_permission" "update_current_image_target" {
@@ -498,6 +502,12 @@ output "api_base_url" {
 # S3 Bucket
 resource "aws_s3_bucket" "crowd_images" {
   bucket = "projectawscrowdimages3bucket"
+
+	force_destroy = true
+
+	lifecycle {
+		prevent_destroy = false
+	}
 }
 
 resource "aws_s3_bucket_policy" "crowd_images_public_access" {
