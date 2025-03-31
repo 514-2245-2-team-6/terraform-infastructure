@@ -160,16 +160,10 @@ resource "aws_cloudwatch_event_target" "update_current_image_target" {
   arn = aws_lambda_function.update_current_image_function.arn
 }
 
-# API Gateway
+# API GateAPI Gateway
 resource "aws_api_gateway_rest_api" "lambda_api" {
   name = "lambda-api"
   description = "API for accessing Lambda functions"
-}
-
-resource "aws_api_gateway_resource" "update_current_image" {
-  rest_api_id = aws_api_gateway_rest_api.lambda_api.id
-  parent_id = aws_api_gateway_rest_api.lambda_api.root_resource_id
-  path_part = "updateCurrentImage"
 }
 
 resource "aws_api_gateway_resource" "get_random_cropped_face" {
@@ -184,131 +178,133 @@ resource "aws_api_gateway_resource" "verify_face_selection" {
   path_part = "verifyFaceSelection"
 }
 
-resource "aws_api_gateway_method" "get_update_current_image" {
-  rest_api_id = aws_api_gateway_rest_api.lambda_api.id
-  resource_id = aws_api_gateway_resource.update_current_image.id
-  http_method = "POST"  # or "GET" depending on your requirement
-  authorization = "NONE"
-}
+# API Gateway Methods
+resource "aws_api_gateway_method" "post_get_random_cropped_face" {
+	depends_on = [
+		aws_api_gateway_resource.get_random_cropped_face
+	]
 
-resource "aws_api_gateway_method" "get_random_cropped_face" {
   rest_api_id = aws_api_gateway_rest_api.lambda_api.id
   resource_id = aws_api_gateway_resource.get_random_cropped_face.id
   http_method = "POST"
-  authorization = "NONE"
-}
-
-resource "aws_api_gateway_method" "get_verify_face_selection" {
-  rest_api_id = aws_api_gateway_rest_api.lambda_api.id
-  resource_id = aws_api_gateway_resource.verify_face_selection.id
-  http_method = "POST"
-  authorization = "NONE"
-}
-
-resource "aws_api_gateway_method" "options_update_current_image" {
-  rest_api_id = aws_api_gateway_rest_api.lambda_api.id
-  resource_id = aws_api_gateway_resource.update_current_image.id
-  http_method = "OPTIONS"
   authorization = "NONE"
 }
 
 resource "aws_api_gateway_method" "options_get_random_cropped_face" {
+	depends_on = [
+		aws_api_gateway_resource.get_random_cropped_face
+	]
+
   rest_api_id = aws_api_gateway_rest_api.lambda_api.id
   resource_id = aws_api_gateway_resource.get_random_cropped_face.id
   http_method = "OPTIONS"
   authorization = "NONE"
 }
 
+resource "aws_api_gateway_method" "post_verify_face_selection" {
+	depends_on = [
+		aws_api_gateway_resource.verify_face_selection
+	]
+
+  rest_api_id = aws_api_gateway_rest_api.lambda_api.id
+  resource_id = aws_api_gateway_resource.verify_face_selection.id
+  http_method = "POST"
+  authorization = "NONE"
+}
+
 resource "aws_api_gateway_method" "options_verify_face_selection" {
+	depends_on = [
+		aws_api_gateway_resource.verify_face_selection
+	]
+
   rest_api_id = aws_api_gateway_rest_api.lambda_api.id
   resource_id = aws_api_gateway_resource.verify_face_selection.id
   http_method = "OPTIONS"
   authorization = "NONE"
 }
 
-resource "aws_api_gateway_integration" "lambda_integration_update_current_image" {
-  rest_api_id = aws_api_gateway_rest_api.lambda_api.id
-  resource_id = aws_api_gateway_resource.update_current_image.id
-  http_method = aws_api_gateway_method.get_update_current_image.http_method
-  integration_http_method = "POST"
-  type = "AWS_PROXY"  # Use AWS_PROXY for proxy integration with Lambda
-  uri = "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/${aws_lambda_function.update_current_image_function.arn}/invocations"
-}
+# API Gateway Integrations
+resource "aws_api_gateway_integration" "post_get_random_cropped_face" {
+	depends_on = [
+		aws_api_gateway_method.post_get_random_cropped_face
+	]
 
-resource "aws_api_gateway_integration" "lambda_integration_get_random_cropped_face" {
   rest_api_id = aws_api_gateway_rest_api.lambda_api.id
   resource_id = aws_api_gateway_resource.get_random_cropped_face.id
-  http_method = aws_api_gateway_method.get_random_cropped_face.http_method
+  http_method = aws_api_gateway_method.post_get_random_cropped_face.http_method
   integration_http_method = "POST"
   type = "AWS_PROXY"
   uri = "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/${aws_lambda_function.get_random_cropped_face_in_current_image_function.arn}/invocations"
 }
 
-resource "aws_api_gateway_integration" "lambda_integration_verify_face_selection" {
+resource "aws_api_gateway_integration" "options_get_random_cropped_face" {
+	depends_on = [
+		aws_api_gateway_method.options_get_random_cropped_face
+	]
+
+  rest_api_id = aws_api_gateway_rest_api.lambda_api.id
+  resource_id = aws_api_gateway_resource.get_random_cropped_face.id
+  http_method = "OPTIONS"
+	integration_http_method = "OPTIONS"
+  type = "MOCK"
+	request_templates = {
+		"application/json" = jsonencode(
+      {
+        statusCode = 200
+      }
+    )
+	}
+}
+
+resource "aws_api_gateway_integration" "post_verify_face_selection" {
+	depends_on = [
+		aws_api_gateway_method.post_verify_face_selection
+	]
+
   rest_api_id = aws_api_gateway_rest_api.lambda_api.id
   resource_id = aws_api_gateway_resource.verify_face_selection.id
-  http_method = aws_api_gateway_method.get_verify_face_selection.http_method
+  http_method = aws_api_gateway_method.post_verify_face_selection.http_method
   integration_http_method = "POST"
   type = "AWS_PROXY"
   uri = "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/${aws_lambda_function.verify_face_selection_function.arn}/invocations"
 }
 
-resource "aws_api_gateway_method_response" "update_current_image_response" {
-  rest_api_id = aws_api_gateway_rest_api.lambda_api.id
-  resource_id = aws_api_gateway_resource.update_current_image.id
-  http_method = "POST"
-  status_code = "200"
+resource "aws_api_gateway_integration" "options_verify_face_selection" {
+	depends_on = [
+		aws_api_gateway_method.options_verify_face_selection
+	]
 
-  response_parameters = {
-    "method.response.header.Access-Control-Allow-Origin" = true
-    "method.response.header.Access-Control-Allow-Methods" = true
-    "method.response.header.Access-Control-Allow-Headers" = true
-  }
-}
-
-resource "aws_api_gateway_integration_response" "update_current_image_integration_response" {
-  rest_api_id = aws_api_gateway_rest_api.lambda_api.id
-  resource_id = aws_api_gateway_resource.update_current_image.id
-  http_method = aws_api_gateway_method.get_update_current_image.http_method
-  status_code = "200"
-
-  response_parameters = {
-    "method.response.header.Access-Control-Allow-Origin"  = "'*'"
-    "method.response.header.Access-Control-Allow-Methods" = "'POST, OPTIONS'"
-    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type, X-Amz-Date, Authorization, X-Api-Key'"
-  }
-}
-
-resource "aws_api_gateway_method_response" "get_random_cropped_face_response" {
-  rest_api_id = aws_api_gateway_rest_api.lambda_api.id
-  resource_id = aws_api_gateway_resource.get_random_cropped_face.id
-  http_method = "POST"
-  status_code = "200"
-
-  response_parameters = {
-    "method.response.header.Access-Control-Allow-Origin" = true
-    "method.response.header.Access-Control-Allow-Methods" = true
-    "method.response.header.Access-Control-Allow-Headers" = true
-  }
-}
-
-resource "aws_api_gateway_integration_response" "get_random_cropped_face_integration_response" {
-  rest_api_id = aws_api_gateway_rest_api.lambda_api.id
-  resource_id = aws_api_gateway_resource.get_random_cropped_face.id
-  http_method = aws_api_gateway_method.get_random_cropped_face.http_method
-  status_code = "200"
-
-  response_parameters = {
-    "method.response.header.Access-Control-Allow-Origin"  = "'*'"
-    "method.response.header.Access-Control-Allow-Methods" = "'POST, OPTIONS'"
-    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type, X-Amz-Date, Authorization, X-Api-Key'"
-  }
-}
-
-resource "aws_api_gateway_method_response" "verify_face_selection_response" {
   rest_api_id = aws_api_gateway_rest_api.lambda_api.id
   resource_id = aws_api_gateway_resource.verify_face_selection.id
-  http_method = "POST"
+  http_method = "OPTIONS"
+	integration_http_method = "OPTIONS"
+  type = "MOCK"
+	request_templates = {
+		    "application/json" = <<EOF
+{
+	"statusCode": 200,
+  "left": "$input.path('$.left')",
+  "top": "$input.path('$.top')",
+  "bounding_box": {
+    "Width": "$input.path('$.bounding_box.width')",
+    "Height": "$input.path('$.bounding_box.height')",
+    "Left": "$input.path('$.bounding_box.left')",
+    "Top": "$input.path('$.bounding_box.top')"
+  }
+}
+EOF
+	}
+}
+
+# API Gateway Method Responses
+resource "aws_api_gateway_method_response" "post_get_random_cropped_face" {
+	depends_on = [
+		aws_api_gateway_method.post_get_random_cropped_face
+	]
+
+  rest_api_id = aws_api_gateway_rest_api.lambda_api.id
+  resource_id = aws_api_gateway_resource.get_random_cropped_face.id
+  http_method = aws_api_gateway_method.post_get_random_cropped_face.http_method
   status_code = "200"
 
   response_parameters = {
@@ -318,24 +314,128 @@ resource "aws_api_gateway_method_response" "verify_face_selection_response" {
   }
 }
 
-resource "aws_api_gateway_integration_response" "verify_face_selection_integration_response" {
+resource "aws_api_gateway_method_response" "options_get_random_cropped_face" {
+	depends_on = [
+		aws_api_gateway_method.options_get_random_cropped_face
+	]
+
+  rest_api_id = aws_api_gateway_rest_api.lambda_api.id
+  resource_id = aws_api_gateway_resource.get_random_cropped_face.id
+  http_method = "OPTIONS"
+  status_code = "200"
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Origin" = true
+    "method.response.header.Access-Control-Allow-Methods" = true
+    "method.response.header.Access-Control-Allow-Headers" = true
+  }
+}
+
+resource "aws_api_gateway_method_response" "post_verify_face_selection" {
+	depends_on = [
+		aws_api_gateway_method.post_verify_face_selection
+	]
+
   rest_api_id = aws_api_gateway_rest_api.lambda_api.id
   resource_id = aws_api_gateway_resource.verify_face_selection.id
-  http_method = aws_api_gateway_method.get_verify_face_selection.http_method
+  http_method = aws_api_gateway_method.post_verify_face_selection.http_method
+  status_code = "200"
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Origin" = true
+    "method.response.header.Access-Control-Allow-Methods" = true
+    "method.response.header.Access-Control-Allow-Headers" = true
+  }
+}
+
+resource "aws_api_gateway_method_response" "options_verify_face_selection" {
+	depends_on = [
+		aws_api_gateway_method.options_verify_face_selection
+	]
+
+  rest_api_id = aws_api_gateway_rest_api.lambda_api.id
+  resource_id = aws_api_gateway_resource.verify_face_selection.id
+  http_method = "OPTIONS"
+  status_code = "200"
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Origin" = true
+    "method.response.header.Access-Control-Allow-Methods" = true
+    "method.response.header.Access-Control-Allow-Headers" = true
+  }
+}
+
+# API Gateway Integration Responses
+resource "aws_api_gateway_integration_response" "post_get_random_cropped_face" {
+	depends_on = [
+		aws_api_gateway_integration.post_get_random_cropped_face,
+		aws_api_gateway_method_response.post_get_random_cropped_face
+	]
+
+  rest_api_id = aws_api_gateway_rest_api.lambda_api.id
+  resource_id = aws_api_gateway_resource.get_random_cropped_face.id
+  http_method = aws_api_gateway_method.post_get_random_cropped_face.http_method
+  status_code = aws_api_gateway_method_response.post_get_random_cropped_face.status_code
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Origin"  = "'*'"
+    "method.response.header.Access-Control-Allow-Methods" = "'OPTIONS,POST'"
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+  }
+}
+
+resource "aws_api_gateway_integration_response" "options_get_random_cropped_face" {
+	depends_on = [
+		aws_api_gateway_integration.options_get_random_cropped_face,
+		aws_api_gateway_method_response.options_get_random_cropped_face
+	]
+
+  rest_api_id = aws_api_gateway_rest_api.lambda_api.id
+  resource_id = aws_api_gateway_resource.get_random_cropped_face.id
+  http_method = "OPTIONS"
   status_code = "200"
 
   response_parameters = {
     "method.response.header.Access-Control-Allow-Origin"  = "'*'"
-    "method.response.header.Access-Control-Allow-Methods" = "'POST, OPTIONS'"
-    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type, X-Amz-Date, Authorization, X-Api-Key'"
+    "method.response.header.Access-Control-Allow-Methods" = "'OPTIONS,POST'"
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
   }
 }
 
-resource "aws_lambda_permission" "allow_api_gateway_to_invoke_update_current_image" {
-  statement_id = "AllowAPIGatewayInvokeUpdateCurrentImage"
-  action = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.update_current_image_function.function_name
-  principal = "apigateway.amazonaws.com"
+resource "aws_api_gateway_integration_response" "post_verify_face_selection" {
+	depends_on = [
+		aws_api_gateway_integration.post_verify_face_selection,
+		aws_api_gateway_method_response.post_verify_face_selection
+	]
+
+  rest_api_id = aws_api_gateway_rest_api.lambda_api.id
+  resource_id = aws_api_gateway_resource.verify_face_selection.id
+  http_method = aws_api_gateway_method.post_verify_face_selection.http_method
+  status_code = aws_api_gateway_method_response.post_verify_face_selection.status_code
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Origin"  = "'*'"
+    "method.response.header.Access-Control-Allow-Methods" = "'OPTIONS,POST'"
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+  }
+}
+
+resource "aws_api_gateway_integration_response" "options_verify_face_selection" {
+	depends_on = [
+		aws_api_gateway_integration.options_verify_face_selection,
+		aws_api_gateway_method_response.options_verify_face_selection
+	]
+
+  rest_api_id = aws_api_gateway_rest_api.lambda_api.id
+  resource_id = aws_api_gateway_resource.verify_face_selection.id
+  http_method = "OPTIONS"
+  status_code = "200"
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Origin"  = "'*'"
+    "method.response.header.Access-Control-Allow-Methods" = "'OPTIONS,POST'"
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+  }
 }
 
 resource "aws_lambda_permission" "allow_api_gateway_to_invoke_get_random_cropped_face" {
@@ -356,29 +456,75 @@ resource "aws_api_gateway_deployment" "lambda_api_deployment" {
   rest_api_id = aws_api_gateway_rest_api.lambda_api.id
 
   depends_on = [
-    aws_api_gateway_method.get_update_current_image,
-    aws_api_gateway_method.get_random_cropped_face,
-    aws_api_gateway_method.get_verify_face_selection,
-    aws_api_gateway_method.options_update_current_image,
+    aws_api_gateway_method.post_get_random_cropped_face,
     aws_api_gateway_method.options_get_random_cropped_face,
+    aws_api_gateway_method.post_verify_face_selection,
     aws_api_gateway_method.options_verify_face_selection,
-		aws_api_gateway_method_response.update_current_image_response,
-		aws_api_gateway_method_response.get_random_cropped_face_response,
-		aws_api_gateway_method_response.verify_face_selection_response,
-    aws_api_gateway_integration.lambda_integration_update_current_image,
-    aws_api_gateway_integration.lambda_integration_get_random_cropped_face,
-    aws_api_gateway_integration.lambda_integration_verify_face_selection,
-		aws_api_gateway_integration_response.update_current_image_integration_response,
-		aws_api_gateway_integration_response.get_random_cropped_face_integration_response,
-		aws_api_gateway_integration_response.verify_face_selection_integration_response
+
+    aws_api_gateway_integration.post_get_random_cropped_face,
+    aws_api_gateway_integration.options_get_random_cropped_face,
+    aws_api_gateway_integration.post_verify_face_selection,
+    aws_api_gateway_integration.options_verify_face_selection,
+
+		aws_api_gateway_method_response.post_get_random_cropped_face,
+		aws_api_gateway_method_response.options_get_random_cropped_face,
+		aws_api_gateway_method_response.post_verify_face_selection,
+		aws_api_gateway_method_response.options_get_random_cropped_face,
+
+		aws_api_gateway_integration_response.post_get_random_cropped_face,
+		aws_api_gateway_integration_response.options_get_random_cropped_face,
+		aws_api_gateway_integration_response.post_verify_face_selection,
+		aws_api_gateway_integration_response.options_get_random_cropped_face,
+
+		aws_lambda_permission.allow_api_gateway_to_invoke_get_random_cropped_face,
+		aws_lambda_permission.allow_api_gateway_to_invoke_verify_face_selection,
   ]
+}
+
+# Create the API Gateway Stage
+resource "aws_api_gateway_stage" "lambda_api_stage" {
+  stage_name    = "prod"  # You can change the stage name as needed (e.g., dev, prod)
+  rest_api_id   = aws_api_gateway_rest_api.lambda_api.id
+  deployment_id = aws_api_gateway_deployment.lambda_api_deployment.id
+}
+
+# Output the Base URL of the API Gateway
+output "api_base_url" {
+  value = "https://${aws_api_gateway_rest_api.lambda_api.id}.execute-api.us-east-1.amazonaws.com/${aws_api_gateway_stage.lambda_api_stage.stage_name}/"
+  description = "The base URL of the API Gateway"
 }
 
 
 # S3 Bucket
 resource "aws_s3_bucket" "crowd_images" {
-  bucket = "projectawscrowdimages3buckettest"
+  bucket = "projectawscrowdimages3bucket"
 }
+
+resource "aws_s3_bucket_policy" "crowd_images_public_access" {
+  bucket = aws_s3_bucket.crowd_images.id
+
+  policy = data.aws_iam_policy_document.crowd_images_public_access.json
+}
+
+data "aws_iam_policy_document" "crowd_images_public_access" {
+  statement {
+    actions = [
+      "s3:GetObject"
+    ]
+
+    resources = [
+      "${aws_s3_bucket.crowd_images.arn}/*"
+    ]
+
+    effect = "Allow"
+
+    principals {
+      type = "AWS"
+      identifiers = ["*"]
+    }
+  }
+}
+
 
 resource "aws_s3_bucket_ownership_controls" "crowd_images" {
   bucket = aws_s3_bucket.crowd_images.id
@@ -407,6 +553,10 @@ resource "aws_s3_bucket_acl" "crowd_images" {
 }
 
 resource "aws_s3_bucket_cors_configuration" "crowd_images" {
+	depends_on = [
+		aws_s3_bucket.crowd_images
+	]
+
   bucket = aws_s3_bucket.crowd_images.id
 
   cors_rule {
@@ -433,6 +583,12 @@ resource "aws_s3_object" "crowd_image_2" {
 resource "aws_s3_object" "crowd_image_3" {
   bucket = aws_s3_bucket.crowd_images.bucket
   key = "crowd-images/crowd-image3.png"
+  source = "./crowd-images/crowdimage3.png"
+}
+
+resource "aws_s3_object" "current_image" {
+  bucket = aws_s3_bucket.crowd_images.bucket
+  key = "current-image.png"
   source = "./crowd-images/crowdimage3.png"
 }
 
