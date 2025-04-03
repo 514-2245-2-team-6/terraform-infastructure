@@ -1,6 +1,31 @@
+# Variables
+variable "s3_bucket_name" {
+	type = string
+	description = "The name of the S3 bucket"
+	default = "projectawscrowdimages3bucket"
+}
+
+variable "s3_crowd_images_directory" {
+	type = string
+	description = "The name the directory that contains the crowd images"
+	default = "crowd-images"
+}
+
+variable "s3_current_image_file_name" {
+	type = string
+	description = "The name of the file that contains the current image"
+	default = "current-image.png"
+}
+
+variable "s3_cropped_image_file_name" {
+	type = string
+	description = "The name of the file that contains the cropped face image"
+	default = "cropped-face-image.png"
+}
+
 # Resources Built
 resource "aws_s3_bucket" "crowd_images" {
-  bucket = "projectawscrowdimages3bucket"
+  bucket = var.s3_bucket_name
 
 	force_destroy = true
 
@@ -79,25 +104,25 @@ resource "aws_s3_bucket_cors_configuration" "crowd_images" {
 
 resource "aws_s3_object" "crowd_image_1" {
   bucket = aws_s3_bucket.crowd_images.bucket
-  key = "crowd-images/crowd-image1.png"
+  key = "${var.s3_crowd_images_directory}/crowd-image1.png"
   source = "./assets/crowd-images/crowdimage1.png"  # Local file path
 }
 
 resource "aws_s3_object" "crowd_image_2" {
   bucket = aws_s3_bucket.crowd_images.bucket
-  key = "crowd-images/crowd-image2.png"
+  key = "${var.s3_crowd_images_directory}/crowd-image2.png"
   source = "./assets/crowd-images/crowdimage2.png"
 }
 
 resource "aws_s3_object" "crowd_image_3" {
   bucket = aws_s3_bucket.crowd_images.bucket
-  key = "crowd-images/crowd-image3.png"
+  key = "${var.s3_crowd_images_directory}/crowd-image3.png"
   source = "./assets/crowd-images/crowdimage3.png"
 }
 
 resource "aws_s3_object" "current_image" {
   bucket = aws_s3_bucket.crowd_images.bucket
-  key = "current-image.png"
+  key = var.s3_current_image_file_name
   source = "./assets/crowd-images/crowdimage3.png"
 }
 
