@@ -125,9 +125,3 @@ resource "aws_s3_object" "current_image" {
   key = var.s3_current_image_file_name
   source = "./assets/crowd-images/crowdimage3.png"
 }
-
-
-# Outputs
-output "s3_bucket_url" {
-  value = "https://${aws_s3_bucket.crowd_images.bucket}.s3.amazonaws.com/"
-}

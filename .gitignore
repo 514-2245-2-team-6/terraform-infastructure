@@ -1,3 +1,6 @@
+# Development Variable Values
+*dev.tfvars
+
 # Bash Files
 *.sh
 
@@ -5,7 +8,6 @@
 *.tfstate
 *.tfstate.backup
 terraform.tfstate.d/
-variable-values/
 
 # Terraform plan files
 *.tfplan

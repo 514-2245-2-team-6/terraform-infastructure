@@ -26,6 +26,7 @@ variable "app_domain_name" {
 variable "github_access_token" {
 	type = string
 	description = "GitHub Personal Access Token"
+	sensitive = true
 }
 
 

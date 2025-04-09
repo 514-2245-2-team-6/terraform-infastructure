@@ -330,10 +330,3 @@ resource "aws_api_gateway_stage" "lambda_api_stage" {
   rest_api_id = aws_api_gateway_rest_api.lambda_api.id
   deployment_id = aws_api_gateway_deployment.lambda_api_deployment.id
 }
-
-
-# Outputs
-output "api_base_url" {
-  value = "https://${aws_api_gateway_rest_api.lambda_api.id}.execute-api.${var.aws_region}.amazonaws.com/${aws_api_gateway_stage.lambda_api_stage.stage_name}/"
-  description = "The base URL of the API Gateway"
-}
