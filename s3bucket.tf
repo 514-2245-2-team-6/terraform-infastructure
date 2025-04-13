@@ -2,7 +2,7 @@
 variable "s3_bucket_name" {
 	type = string
 	description = "The name of the S3 bucket"
-	default = "projectawscrowdimages3bucket"
+	default = "projectawscrowdimages3bucket2"
 }
 
 variable "s3_crowd_images_directory" {

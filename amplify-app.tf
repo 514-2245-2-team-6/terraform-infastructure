@@ -87,6 +87,9 @@ resource "aws_amplify_app" "amplify_app" {
   environment_variables = {
     NODE_OPTIONS = "--max-old-space-size=4096"
     VITE_API_GATEWAY_BASE_URL = "https://${aws_api_gateway_rest_api.lambda_api.id}.execute-api.${var.aws_region}.amazonaws.com/${aws_api_gateway_stage.lambda_api_stage.stage_name}"
+		VITE_S3_BUCKET_BASE_URL = "https://${aws_s3_bucket.crowd_images.id}.s3.${var.aws_region}.amazonaws.com/"
+		VITE_PATH_TO_CURRENT_IMAGE = var.s3_current_image_file_name
+		VITE_PATH_TO_CROPPED_IMAGE = var.s3_cropped_image_file_name
   }
 }
 
