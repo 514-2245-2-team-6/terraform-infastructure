@@ -93,10 +93,10 @@ resource "aws_api_gateway_integration" "options_get_random_cropped_face" {
   type = "MOCK"
 	request_templates = {
 		"application/json" = jsonencode(
-      {
-        statusCode = 200
-      }
-    )
+			{
+				statusCode = 200
+			}
+		)
 	}
 }
 
@@ -184,6 +184,10 @@ resource "aws_api_gateway_method_response" "options_get_random_cropped_face" {
     "method.response.header.Access-Control-Allow-Methods" = true
     "method.response.header.Access-Control-Allow-Headers" = true
   }
+
+	response_models = {
+		"application/json" = "Empty"
+	}
 }
 resource "aws_api_gateway_method_response" "post_upload_image_200" {
 	depends_on = [
@@ -233,6 +237,10 @@ resource "aws_api_gateway_method_response" "options_upload_image_200" {
     "method.response.header.Access-Control-Allow-Methods" = true
     "method.response.header.Access-Control-Allow-Headers" = true
   }
+
+	response_models = {
+		"application/json" = "Empty"
+	}
 }
 
 resource "aws_api_gateway_method_response" "options_upload_image_500" {
@@ -287,6 +295,10 @@ resource "aws_api_gateway_integration_response" "options_get_random_cropped_face
     "method.response.header.Access-Control-Allow-Methods" = "'OPTIONS,POST'"
     "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
   }
+
+	response_templates = {
+    "application/json" = ""
+  }
 }
 resource "aws_api_gateway_integration_response" "post_upload_image" {
 	depends_on = [
@@ -325,6 +337,10 @@ resource "aws_api_gateway_integration_response" "options_upload_image" {
     "method.response.header.Access-Control-Allow-Methods" = "'OPTIONS,POST'"
     "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
   }
+
+	response_templates = {
+    "application/json" = ""
+  }
 }
 
 # API Gateway Permissions
@@ -344,6 +360,32 @@ resource "aws_lambda_permission" "allow_api_gateway_to_invoke_upload_image" {
 
 resource "aws_api_gateway_deployment" "lambda_api_deployment" {
   rest_api_id = aws_api_gateway_rest_api.lambda_api.id
+
+	triggers = {
+		redeployment = sha1(jsonencode([
+			aws_api_gateway_resource.get_random_cropped_face.id,
+			aws_api_gateway_resource.upload_image.id,
+			aws_api_gateway_method.post_get_random_cropped_face.id,
+			aws_api_gateway_method.options_get_random_cropped_face.id,
+			aws_api_gateway_method.post_upload_image.id,
+			aws_api_gateway_method.options_upload_image.id,
+			aws_api_gateway_integration.post_get_random_cropped_face.id,
+			aws_api_gateway_integration.options_get_random_cropped_face.id,
+			aws_api_gateway_integration.post_upload_image.id,
+			aws_api_gateway_integration.options_upload_image_200.id,
+			aws_api_gateway_integration.options_upload_image_500.id,
+			aws_api_gateway_method_response.post_get_random_cropped_face.id,
+			aws_api_gateway_method_response.options_get_random_cropped_face.id,
+			aws_api_gateway_method_response.post_upload_image_200.id,
+			aws_api_gateway_method_response.post_upload_image_500.id,
+			aws_api_gateway_method_response.options_upload_image_200.id,
+			aws_api_gateway_method_response.options_upload_image_500.id,
+			aws_api_gateway_integration_response.post_get_random_cropped_face.id,
+			aws_api_gateway_integration_response.options_get_random_cropped_face.id,
+			aws_api_gateway_integration_response.post_upload_image.id,
+			aws_api_gateway_integration_response.options_upload_image.id,
+		]))
+	}
 
   depends_on = [
     aws_api_gateway_method.post_get_random_cropped_face,
