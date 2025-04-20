@@ -37,7 +37,7 @@ This will prompt you to enter your AWS access key, secret key, region, and defau
 
 In the `variable-values/prod.tfvars` file, you'll need to fill in the following variables:
 
-- **github_access_token**: Enter your GitHub personal access token with `read/write` and `webhook` access to your repository.
+- **github_access_token**: Enter your GitHub personal access token with read/write permissions for your public repositories. (More details below)
 - **email_addresses**: Enter the email addresses that will receive notifications for the app.
 
 Here’s an example of how to set these variables:
@@ -46,6 +46,19 @@ Here’s an example of how to set these variables:
 github_access_token = "ghp_exampleAccessTokenHere"
 email_addresses = ["email@example.com"]
 ```
+
+#### 3.1 Creating a GitHub Personal Access Token
+
+To create a GitHub personal access token with the required scopes:
+
+1. Go to [https://github.com/settings/tokens](https://github.com/settings/tokens)
+2. Click **"Generate new token"** > **"Generate new token (classic)"**
+3. Set an expiration date and token name
+4. Select the following scopes:
+   - `public_repo` (for public repositories)
+   - `admin:repo_hook` (to allow webhook setup for automatic deployments)
+5. Click **"Generate token"** and copy the token (you won’t be able to see it again)
+6. Paste it into the `github_access_token` field in your `prod.tfvars` file
 
 ### 4. Initialize Terraform
 

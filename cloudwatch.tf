@@ -1,7 +1,7 @@
 variable "update_current_image_cron_expression" {
 	type = string
 	description = "Cron expression for when to trigger the update current image lambda function"
-	default = "cron(8 5 * * ? *)"
+	default = "cron(30 22 * * ? *)"
 }
 
 resource "aws_cloudwatch_event_rule" "update_current_image_rule" {

@@ -2,7 +2,7 @@
 variable "s3_bucket_name" {
 	type = string
 	description = "The name of the S3 bucket"
-	default = "projectawscrowdimages3bucket2"
+	default = "projectawscrowdimages3bucketv2"
 }
 
 variable "s3_crowd_images_directory" {
@@ -34,34 +34,9 @@ resource "aws_s3_bucket" "crowd_images" {
 	}
 }
 
-resource "aws_s3_bucket_policy" "crowd_images_public_access" {
-  bucket = aws_s3_bucket.crowd_images.id
-
-  policy = data.aws_iam_policy_document.crowd_images_public_access.json
-}
-
-data "aws_iam_policy_document" "crowd_images_public_access" {
-  statement {
-    actions = [
-      "s3:GetObject"
-    ]
-
-    resources = [
-      "${aws_s3_bucket.crowd_images.arn}/*"
-    ]
-
-    effect = "Allow"
-
-    principals {
-      type = "AWS"
-      identifiers = ["*"]
-    }
-  }
-}
-
-
 resource "aws_s3_bucket_ownership_controls" "crowd_images" {
   bucket = aws_s3_bucket.crowd_images.id
+
   rule {
     object_ownership = "BucketOwnerPreferred"
   }
@@ -76,21 +51,45 @@ resource "aws_s3_bucket_public_access_block" "crowd_images" {
   restrict_public_buckets = false
 }
 
-resource "aws_s3_bucket_acl" "crowd_images" {
+# resource "aws_s3_bucket_acl" "crowd_images" {
+#   depends_on = [
+#     aws_s3_bucket_ownership_controls.crowd_images,
+#     aws_s3_bucket_public_access_block.crowd_images,
+#   ]
+
+#   bucket = aws_s3_bucket.crowd_images.id
+#   acl = "public-read"
+# }
+
+# Bucket Policy to allow public read access
+data "aws_iam_policy_document" "crowd_images_public_access" {
+  statement {
+    effect = "Allow"
+
+    actions = ["s3:GetObject"]
+
+    resources = ["${aws_s3_bucket.crowd_images.arn}/*"]
+
+    principals {
+      type        = "AWS"
+      identifiers = ["*"]
+    }
+  }
+}
+
+
+resource "aws_s3_bucket_policy" "crowd_images_public_access" {
   depends_on = [
+    aws_s3_bucket.crowd_images,
     aws_s3_bucket_ownership_controls.crowd_images,
     aws_s3_bucket_public_access_block.crowd_images,
   ]
 
   bucket = aws_s3_bucket.crowd_images.id
-  acl = "public-read"
+  policy = data.aws_iam_policy_document.crowd_images_public_access.json
 }
 
 resource "aws_s3_bucket_cors_configuration" "crowd_images" {
-	depends_on = [
-		aws_s3_bucket.crowd_images
-	]
-
   bucket = aws_s3_bucket.crowd_images.id
 
   cors_rule {

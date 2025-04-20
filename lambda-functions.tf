@@ -106,6 +106,7 @@ resource "aws_lambda_function" "update_current_image_function" {
 
   filename = "./assets/lambda-functions/updateCurrentImage.zip"
 	source_code_hash = filebase64sha256("./assets/lambda-functions/updateCurrentImage.zip")
+	timeout = 500
 
 	environment {
 		variables = {
@@ -122,6 +123,7 @@ resource "aws_lambda_function" "get_random_cropped_face_in_current_image_functio
 	role = aws_iam_role.lambda_rekognition_and_read_write_s3.arn
 	handler = "lambda_function.lambda_handler"
 	runtime = "python3.10"
+	timeout = 500
 
 	filename = "./assets/lambda-functions/getRandomCroppedFaceInCurrentImage.zip"
 	source_code_hash = filebase64sha256("./assets/lambda-functions/getRandomCroppedFaceInCurrentImage.zip")
@@ -131,6 +133,24 @@ resource "aws_lambda_function" "get_random_cropped_face_in_current_image_functio
 			S3_BUCKET_NAME = aws_s3_bucket.crowd_images.bucket
 			PATH_TO_CURRENT_IMAGE = var.s3_current_image_file_name
 			PATH_TO_CROPPED_IMAGE = var.s3_cropped_image_file_name
+		}
+	}
+}
+
+resource "aws_lambda_function" "upload_image" {
+	function_name = "uploadImage"
+	role = aws_iam_role.lambda_read_write_s3.arn
+	handler = "lambda_function.lambda_handler"
+	runtime = "python3.10"
+
+	filename = "./assets/lambda-functions/uploadImage.zip"
+	source_code_hash = filebase64sha256("./assets/lambda-functions/uploadImage.zip")
+	timeout = 500
+
+	environment {
+		variables = {
+			S3_BUCKET_NAME = aws_s3_bucket.crowd_images.bucket
+			PATH_TO_CURRENT_IMAGE = var.s3_current_image_file_name
 		}
 	}
 }
