@@ -51,15 +51,15 @@ resource "aws_s3_bucket_public_access_block" "crowd_images" {
   restrict_public_buckets = false
 }
 
-# resource "aws_s3_bucket_acl" "crowd_images" {
-#   depends_on = [
-#     aws_s3_bucket_ownership_controls.crowd_images,
-#     aws_s3_bucket_public_access_block.crowd_images,
-#   ]
+resource "aws_s3_bucket_acl" "crowd_images" {
+  depends_on = [
+    aws_s3_bucket_ownership_controls.crowd_images,
+    aws_s3_bucket_public_access_block.crowd_images,
+  ]
 
-#   bucket = aws_s3_bucket.crowd_images.id
-#   acl = "public-read"
-# }
+  bucket = aws_s3_bucket.crowd_images.id
+  acl = "public-read"
+}
 
 # Bucket Policy to allow public read access
 data "aws_iam_policy_document" "crowd_images_public_access" {
@@ -72,7 +72,10 @@ data "aws_iam_policy_document" "crowd_images_public_access" {
 			"s3:PutObject"
 		]
 
-    resources = ["${aws_s3_bucket.crowd_images.arn}/*"]
+    resources = [
+			"${aws_s3_bucket.crowd_images.arn}",
+			"${aws_s3_bucket.crowd_images.arn}/*"
+		]
 
     principals {
       type        = "AWS"
