@@ -66,7 +66,11 @@ data "aws_iam_policy_document" "crowd_images_public_access" {
   statement {
     effect = "Allow"
 
-    actions = ["s3:GetObject"]
+    actions = [
+			"s3:GetObject",
+			"s3:ListBucket",
+			"s3:PutObject"
+		]
 
     resources = ["${aws_s3_bucket.crowd_images.arn}/*"]
 
