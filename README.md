@@ -9,7 +9,7 @@ Before running the Terraform scripts, ensure you have the following:
 1. **AWS Account**: You need an active AWS account with the required permissions to provision resources.
 2. **Terraform**: Make sure you have [Terraform](https://www.terraform.io/downloads.html) installed.
 3. **AWS CLI**: You need to have the [AWS CLI](https://aws.amazon.com/cli/) installed and configured. Run `aws configure` to configure your AWS access key, secret key, region, and output format.
-4. **GitHub Access Token**: You'll need a GitHub access token with read/write and webhook access to the repository, specifically the repository [Where's Waldo App GitHub Repository](https://github.com/514-2245-2-team-6/514-2245-2-team-6).
+4. **GitHub Access Token**: You'll need a GitHub access token with read/write access to public repositories, specifically this repository: [Where's Waldo App GitHub Repository](https://github.com/514-2245-2-team-6/514-2245-2-team-6).
 5. **Email Address**: Provide an email address to receive notifications from the app.
 
 ## Setup Instructions
