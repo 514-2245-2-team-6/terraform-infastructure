@@ -106,3 +106,14 @@ terraform destroy -var-file="variable-values/prod.tfvars"
 ```
 
 Terraform will prompt you to confirm the destruction. Type `yes` to proceed, and Terraform will remove all the resources created on AWS.
+
+## 🤖 Credits
+
+This project uses the following open-source tools and resources:
+
+- [Terraform](https://www.terraform.io/)
+- [AWS Amplify](https://docs.aws.amazon.com/amplify/)
+- [GitHub CLI](https://cli.github.com/)
+
+AI Assistance:
+- Portions of the setup and documentation were guided and reviewed using OpenAI's ChatGPT.
