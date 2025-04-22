@@ -2,6 +2,14 @@
 
 This repository contains Terraform configuration files to set up the complete infrastructure for the **Where's Waldo** application on AWS. It provisions all necessary AWS services, including S3, SNS, CloudWatch, API Gateway, Lambda functions, and an AWS Amplify app.
 
+---
+
+## 📸 PDF Screenshots & Execution Walkthrough
+
+For a complete document walkthrough of the infrastructure setup, app deployment, and teardown process with screenshots, refer to the [Project Setup & Teardown PDF](./Project_Setup_Teardown_Waldo.pdf).
+
+---
+
 ## Prerequisites
 
 Before running the Terraform scripts, ensure you have the following:
